@@ -1,0 +1,27 @@
+# solano.yml configuration file for Solano CI https://www.solanolabs.com/
+
+# http://docs.solanolabs.com/ConfiguringLanguage/php/
+php:
+  version: '7.0'
+
+tests:
+  - env PHPRC=${TDDIUM_REPO_ROOT}/php.ini ./vendor/bin/phpunit -c tests/complete.phpunit.xml
+
+# http://docs.solanolabs.com/Setup/setup-hooks/
+hooks:
+  pre_setup: |
+    set -o errexit -o pipefail  # exit on error
+    # With 'phar.readonly' enabled in php.ini (default = enabled), 'AllFunctionalTest' will fail.
+    # Create a replacement php.ini for use during testing (specified by $PHPRC env var)
+    php_version=`php --version | head -n 1 | awk '{print $2}'`
+    sed 's/;phar.readonly = On/phar.readonly = Off/' /usr/local/php/php-${php_version}/etc/php.ini > php.ini
+    composer install --prefer-dist
+    ./bin/composer install --prefer-dist
+
+# http://docs.solanolabs.com/Setup/caching-dependencies/
+cache:
+  key_paths:
+    - composer.json
+    - composer.lock
+  save_paths:
+    - vendor
