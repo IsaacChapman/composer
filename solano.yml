@@ -4,8 +4,13 @@
 php:
   version: '7.0'
 
+# Automatically parallelize phpunit tests
 tests:
-  - env PHPRC=${TDDIUM_REPO_ROOT}/php.ini ./vendor/bin/phpunit -c tests/complete.phpunit.xml
+  - type: phpunit
+    mode: parallel
+    command: env PHPRC=${TDDIUM_REPO_ROOT}/php.ini ./vendor/bin/solano-phpunit -c tests/complete.phpunit.xml
+    files:
+      - tests/Composer/**Test.php
 
 # http://docs.solanolabs.com/Setup/setup-hooks/
 hooks:
@@ -17,6 +22,8 @@ hooks:
     sed 's/;phar.readonly = On/phar.readonly = Off/' /usr/local/php/php-${php_version}/etc/php.ini > php.ini
     composer install --prefer-dist
     ./bin/composer install --prefer-dist
+    # Install solano-phpunit
+    composer require --dev solano/solano-phpunit:dev-phpunit_5_and_test_priority
 
 # http://docs.solanolabs.com/Setup/caching-dependencies/
 cache:
